@@ -1,0 +1,561 @@
+{
+  "name": "MAIN AI AGENT",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -460,
+        -240
+      ],
+      "id": "210f5dc4-65fd-49ec-a025-4402614cb888",
+      "name": "Telegram Trigger",
+      "webhookId": "4a3714c6-768a-4ce5-98f9-771fc4b36c9b",
+      "credentials": {
+        "telegramApi": {
+          "id": "q7mZ5SKoSI5CYNJg",
+          "name": "MAINAGENT BOT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json['usermessage '] }}{{ $json.usermessage }}\n\n",
+        "options": {
+          "systemMessage": "=# Overview\nYou are the ultimate personal assistant. Your job is to send the user's massage  to the correct tool. You should never be writing emails, or creating even summaries, you just need to call the correct tool.\n\n## Tools\n- emailAgent: Use this tool to take action in email\n- calendarAgent: Use this tool to take action in calendar\n- contactAgent: Use this tool to get, update, or add contacts\n- contentCreator: Use this tool to create blog posts\n- searchTheInternet: Use this tool to search the web\n\n## Rules\n- Some actions require you to look up contact information first. For the following actions, you must get contact information and send that to the agent who needs it:\n  - sending emails\n  - drafting emails\n  - creating calendar event with attendee\n\n## Examples\n1) \n- Input: send an email to nate herkelman asking him what time he wants to leave\n  - Action: Use contactAgent to get nate herkelman's email\n  - Action: Use emailAgent to send the email. You will pass then pass tool a text and say \"send  nate herkman a message to ask him what time he want to leave, here is hs email:{email address}\n- Output: The email has been sent to davtechpro. Anything else I can help you with?\n\n\n\n\n## Final Reminders\nHere is the current date/time: {{ $now }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        820,
+        -280
+      ],
+      "id": "30eb9fdc-216f-405e-bc64-8fef6856f64a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        600,
+        20
+      ],
+      "id": "c6bfe3fe-b9f5-4ce8-9900-d8494f632271",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "description": "call this tool for any contact action.",
+        "workflowId": {
+          "__rl": true,
+          "value": "Y0IdYvDGND1WebHZ",
+          "mode": "list",
+          "cachedResultName": "davtech contact"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1060,
+        40
+      ],
+      "id": "43b1c54a-6a62-435e-aaba-ec9d18a4366a",
+      "name": "contactAgent"
+    },
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "text",
+              "stringValue": "={{ $json?.message?.text || \"\" }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "85730695-5bfe-4c4e-a9e8-22a1d81bbfb3",
+      "name": "Voice or Text",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -260,
+        -240
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0523284b-9f95-4674-8391-9bde290f3a02",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -40,
+        -240
+      ],
+      "id": "63194547-07c3-46e3-ac99-98304ec93176",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        420,
+        -20
+      ],
+      "id": "ac67284b-c4e6-43e1-9b4a-7729350f0256",
+      "name": "BRAIN",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "JKCwwEYjsVjeXRCH",
+          "name": "Google Gemini(PaLM) Api account DAV TECH PRO"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e3e57341-65a6-4e20-9444-bb8841c59347",
+              "name": "usermessage ",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        180,
+        -140
+      ],
+      "id": "10762cb4-2c3f-4040-9150-8fe2dfd3953e",
+      "name": "TEXT PART"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        180,
+        -340
+      ],
+      "id": "6397b97a-f1f1-4b05-a2a7-50f1fcf69f3b",
+      "name": "DOWNLOAD VOICE NOTE",
+      "webhookId": "c122bbc2-60cd-447a-80e4-c84059d7ebd3",
+      "credentials": {
+        "telegramApi": {
+          "id": "q7mZ5SKoSI5CYNJg",
+          "name": "MAINAGENT BOT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepgram.com/v1/listen",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Token 043e364d97579286a1133422869f08fddcab5465"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"url\": \"https://api.telegram.org/file/bot8349194480:AAGKRBMfan1atG8dD7K239r4oPgdhn45AxM/{{ $json.result.file_path }}\",\n  \"model\": \"nova-2\",\n  \"language\": \"en\",\n  \"punctuate\": true,\n  \"numerals\": true\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        600,
+        -460
+      ],
+      "id": "e67109ae-15b8-49af-b72f-0e26ad9d4802",
+      "name": "TRANSCRIBE VOICE NOTE"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "={{ $json.output.replace(/\\*/g, '-') }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1180,
+        -300
+      ],
+      "id": "5fc5df9c-5549-4c6f-9629-34aff1231c68",
+      "name": "REPLY",
+      "webhookId": "561ba5c0-5227-4bff-ba69-a06016628fcf",
+      "credentials": {
+        "telegramApi": {
+          "id": "q7mZ5SKoSI5CYNJg",
+          "name": "MAINAGENT BOT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3d521dba-f10b-4bd9-8ac0-bbadcd67bea5",
+              "name": "usermessage",
+              "value": "={{ $json.results.channels[0].alternatives[0].transcript }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        820,
+        -460
+      ],
+      "id": "693aec99-db98-4f64-8de6-8933e8506eb9",
+      "name": "TEXT AFTER TRANSCRIBE"
+    },
+    {
+      "parameters": {
+        "description": "Call this tool for any calendar action.",
+        "workflowId": {
+          "__rl": true,
+          "value": "KWwOerWDivOG5mEI",
+          "mode": "list",
+          "cachedResultName": "davtechpro calender agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        920,
+        40
+      ],
+      "id": "5d8ce752-59d0-477c-9332-adb75fb09333",
+      "name": "calenderAgent"
+    },
+    {
+      "parameters": {
+        "description": "Call this tool for any email actions.",
+        "workflowId": {
+          "__rl": true,
+          "value": "WzR1eKX0J4HTwjXs",
+          "mode": "list",
+          "cachedResultName": "davtechemailagent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        760,
+        40
+      ],
+      "id": "858f68a4-bec1-44e8-8f0d-69cd6529c55f",
+      "name": "emailAgent"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to search the web.",
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        1240,
+        20
+      ],
+      "id": "8b879d4a-dc6a-4d47-a423-6410cdbfda22",
+      "name": "searchTheInternet"
+    },
+    {
+      "parameters": {
+        "content": "     MAIN AGENT"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -540
+      ],
+      "id": "37672a8f-616c-4264-aa53-b0925c4e28ae",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Voice or Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "REPLY",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "contactAgent": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Voice or Text": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "DOWNLOAD VOICE NOTE",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "TEXT PART",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BRAIN": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TEXT PART": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DOWNLOAD VOICE NOTE": {
+      "main": [
+        [
+          {
+            "node": "TRANSCRIBE VOICE NOTE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TRANSCRIBE VOICE NOTE": {
+      "main": [
+        [
+          {
+            "node": "TEXT AFTER TRANSCRIBE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TEXT AFTER TRANSCRIBE": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calenderAgent": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "emailAgent": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "searchTheInternet": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Africa/Lagos",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "dd2125fa-18b5-479b-8fa5-0eb965c9c752",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "30182a7920ce6332dc5e275b66efeb13a0869746cbf3019348d55af9df100cf7"
+  },
+  "id": "d4fYr3U71WjDITCV",
+  "tags": []
+}

@@ -1,0 +1,294 @@
+{
+  "name": "davtech contact",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "=# Overview\nYou are a contact management assistant. Your responsibilities include looking up contacts, adding new contacts, or updating a contact's information.\n\n**Contact Management**  \n   - Use \"Get Contacts\" to retrieve contact information. \n   - Use \"Add or Update Contact\" to store new contact information or modify existing entries. "
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -500,
+        40
+      ],
+      "id": "e8cfa17f-20a8-40a0-a478-58e8b2c7dfac",
+      "name": "Contact Agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4f360190-a717-4a93-8336-d03ea65975d5",
+              "name": "response",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        40,
+        -60
+      ],
+      "id": "9cbd8154-6220-4e1d-9c47-46d00c0796b1",
+      "name": "Response"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4f360190-a717-4a93-8336-d03ea65975d5",
+              "name": "response",
+              "value": "An error occurred. Please try again.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        40,
+        160
+      ],
+      "id": "fd042d2e-3fe9-4988-9749-6aaac42e3b10",
+      "name": "Try Again"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -740,
+        40
+      ],
+      "id": "61184692-0040-4fe8-b475-80cfdb9340d7",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1jQv264yLzLssaSTqPkld_D-Mae4GX7s0OV0_F22VlqI",
+          "mode": "list",
+          "cachedResultName": "contacts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jQv264yLzLssaSTqPkld_D-Mae4GX7s0OV0_F22VlqI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jQv264yLzLssaSTqPkld_D-Mae4GX7s0OV0_F22VlqI/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        -420,
+        260
+      ],
+      "id": "dda0b031-7377-47e1-a459-cb3647a334d5",
+      "name": "Get Contacts",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0bGcIgh1QTlToVVR",
+          "name": "davtechproofficial@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1jQv264yLzLssaSTqPkld_D-Mae4GX7s0OV0_F22VlqI",
+          "mode": "list",
+          "cachedResultName": "contacts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jQv264yLzLssaSTqPkld_D-Mae4GX7s0OV0_F22VlqI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jQv264yLzLssaSTqPkld_D-Mae4GX7s0OV0_F22VlqI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name ": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Name_', ``, 'string') }}",
+            "Emails": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Emails', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "Name "
+          ],
+          "schema": [
+            {
+              "id": "Name ",
+              "displayName": "Name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Emails",
+              "displayName": "Emails",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        -180,
+        280
+      ],
+      "id": "745b4229-6b98-47f7-9edb-d190df72165d",
+      "name": "update contact",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0bGcIgh1QTlToVVR",
+          "name": "davtechproofficial@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "    CONTACTS AGENT",
+        "height": 140,
+        "width": 200,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        -60
+      ],
+      "id": "228136d1-ec93-41e2-9fb2-6680b5fe4046",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        260
+      ],
+      "id": "a03e5053-8a2b-4b43-b352-4602f31f0e76",
+      "name": "BRAIN",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "JKCwwEYjsVjeXRCH",
+          "name": "Google Gemini(PaLM) Api account DAV TECH PRO"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Contact Agent": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Try Again",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Contact Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Contacts": {
+      "ai_tool": [
+        [
+          {
+            "node": "Contact Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update contact": {
+      "ai_tool": [
+        [
+          {
+            "node": "Contact Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BRAIN": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Contact Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9a1bcd3f-ef75-42e3-bd0d-8a9d22343cc9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "30182a7920ce6332dc5e275b66efeb13a0869746cbf3019348d55af9df100cf7"
+  },
+  "id": "Y0IdYvDGND1WebHZ",
+  "tags": []
+}
