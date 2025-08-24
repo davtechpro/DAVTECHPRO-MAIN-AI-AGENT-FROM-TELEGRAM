@@ -210,7 +210,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Token 043e364d97579286a1133422869f08fddcab5465"
+              "value": "Token {DEEPGRAM TOKEN}"
             },
             {
               "name": "Content-Type",
@@ -220,7 +220,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"url\": \"https://api.telegram.org/file/bot8349194480:AAGKRBMfan1atG8dD7K239r4oPgdhn45AxM/{{ $json.result.file_path }}\",\n  \"model\": \"nova-2\",\n  \"language\": \"en\",\n  \"punctuate\": true,\n  \"numerals\": true\n}\n",
+        "jsonBody": "={\n  \"url\": \"https://api.telegram.org/file/bot{BOT ID}:{TELEGRAMTOKEN}/{{ $json.result.file_path }}\",\n  \"model\": \"nova-2\",\n  \"language\": \"en\",\n  \"punctuate\": true,\n  \"numerals\": true\n}\n",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
